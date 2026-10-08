@@ -1,0 +1,101 @@
+ManagedBlf Noncommercial Source License 1.0
+
+Copyright (c) 2026 Cao (Starkxim).
+
+1. Scope and definitions
+
+"Licensor" means the copyright holder identified above. "Software" means the
+ManagedBlf source code, sample viewer, and documentation supplied under this
+license, including changes to them. Separately licensed third-party material
+remains subject to its own terms.
+
+"Library" means the ManagedBlf parsing library, including its models, reader,
+handle facade, and message decoder, and modifications or adaptations of those
+components. Merely moving, renaming, or incorporating Library code into another
+file or program does not remove that code from this definition. An application
+that uses the Library is not itself part of the Library solely because it uses it.
+
+"Commercial Use" means use for a for-profit business, paid or commissioned work,
+a product or service intended to generate revenue, commercial research or
+development, or internal business operations or tools. Commercial Use includes
+these activities even when the Software, resulting application, or service is
+not sold, charged for, or distributed. "Noncommercial Use" means use that does
+not fall within this definition.
+
+2. Free noncommercial permission
+
+Subject to all conditions below, you may use, copy, modify, integrate, and
+distribute the Software for Noncommercial Use without paying the Licensor.
+Private Noncommercial Use does not require you to publish your changes.
+
+This license grants no permission for Commercial Use. Before any Commercial Use,
+you must obtain a separate written commercial license from the Licensor. Public
+source code, a donation, attribution, or payment for an unrelated item does not
+by itself grant a commercial license. Its price and scope are agreed separately.
+
+3. Copyright and license notices
+
+Copies and redistributions of the Software must preserve the Licensor's
+copyright notice and include this license. Notices may be placed in the source
+files and, for binary distributions, in accompanying documentation or a readily
+accessible license/about section. Modified versions must clearly identify that
+changes were made and must not misrepresent the Licensor as endorsing them.
+
+Your original modifications may carry your own copyright notice, but this
+license and its noncommercial conditions must continue to apply to the Library
+and modifications to it. Recipients must receive the same free noncommercial
+permissions, subject to these same conditions. You cannot grant recipients
+Commercial Use rights to the Licensor's code under this license.
+
+4. Library source when giving others access
+
+When you distribute the Library, or distribute a program containing or using it,
+you must concurrently make the corresponding Library source publicly accessible
+without charge and give recipients a clear link or access instructions.
+
+When you provide other people with an online service that uses the Library,
+you must make the corresponding Library source publicly accessible without
+charge while that service is available, with a clear source link or access
+instructions in the service or its documentation.
+
+The required source is the Library version actually used, including all your
+modifications to it and the files needed to build those modifications. Source
+must be in its preferred editable form. An unmodified Library may be provided
+by linking to an accessible upstream archive or commit for that exact version.
+If you modified it, an upstream link alone is insufficient: provide your
+modified Library source or the exact upstream version together with complete
+modification patches and build instructions.
+
+This obligation covers the Library and changes to it, not the entire application,
+unrelated application code, business data, logs, secrets, or separately licensed
+third-party dependencies. Retain the copyright and license notices with the
+published Library source. Source publication does not make Commercial Use free.
+
+5. Limits of the grant
+
+The grant covers only rights the Licensor is entitled to license. No trademark
+license, endorsement, or permission to distribute a third party's native binary
+or other proprietary material is provided. Rights you have independently under
+applicable law are not restricted by this license.
+
+Permissions for a version received under this license continue while you comply
+with its conditions. A later license published for another version does not by
+itself cancel these permissions. Use outside these permissions is unauthorized
+unless a separate agreement or applicable law allows it.
+
+6. Warranty and liability
+
+To the extent permitted by applicable law, the Software is supplied without
+warranties or commitments about its accuracy, suitability, availability, or
+freedom from defects. You are responsible for evaluating and validating its
+use. The Licensor accepts no liability for loss or damage resulting from the
+Software or its use, except to the extent that applicable law requires otherwise.
+
+7. Commercial licensing contact
+
+Contact Cao (Starkxim) through https://github.com/Starkxim to request a separate
+commercial license. No commercial permission is granted until the separate
+written license is obtained.
+
+This is a source-available license with a noncommercial restriction. It is not
+an OSI-approved open-source license. The English text above is authoritative.

@@ -58,3 +58,13 @@ The facade accepts a bounded `Span<byte>`. Its signatures and data model are **n
 - No general writer, native DLL replacement, recovery/index seeking, DBC decoding, hardware capture, or claim of full BLF compatibility.
 
 Third-party format observations were consulted as references; their implementation source is not included. This project is not affiliated with or endorsed by Vector Informatik.
+
+## License
+
+ManagedBlf is source-available under the [ManagedBlf Noncommercial Source License 1.0](LICENSE). Copyright (c) 2026 Cao (Starkxim).
+
+- Noncommercial use is free, with copyright and license notices preserved.
+- Private noncommercial use does not require publishing changes. When distributing a program or providing an online service using the library, publish the corresponding library source and all library modifications. Your entire application does not need to be published.
+- Commercial use requires a separate written paid license, including company internal tools, commissioned work, and commercial research or development, even if the application is not sold or distributed.
+
+For commercial licensing, contact [Cao (Starkxim)](https://github.com/Starkxim). Public source code does not grant free commercial permission. This custom license is not an OSI-approved open-source license; the full LICENSE text controls.
