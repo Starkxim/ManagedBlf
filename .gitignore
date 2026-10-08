@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+.vs/
+.idea/
+artifacts/
+/private/
+*.user
+*.suo
+*.blf
+*.dll
+*.exe
+*.pdb
+*.zip

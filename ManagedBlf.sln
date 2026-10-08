@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedBlf", "src\ManagedBlf\ManagedBlf.csproj", "{5426F91E-91E8-4A76-9E91-CC00D553D551}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedBlf.Viewer", "samples\ManagedBlf.Viewer\ManagedBlf.Viewer.csproj", "{6827D8C6-80A1-4BC4-A29C-F19251A8C607}"
+EndProject
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+        Release|Any CPU = Release|Any CPU
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {5426F91E-91E8-4A76-9E91-CC00D553D551}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {5426F91E-91E8-4A76-9E91-CC00D553D551}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {5426F91E-91E8-4A76-9E91-CC00D553D551}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {5426F91E-91E8-4A76-9E91-CC00D553D551}.Release|Any CPU.Build.0 = Release|Any CPU
+        {6827D8C6-80A1-4BC4-A29C-F19251A8C607}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {6827D8C6-80A1-4BC4-A29C-F19251A8C607}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {6827D8C6-80A1-4BC4-A29C-F19251A8C607}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {6827D8C6-80A1-4BC4-A29C-F19251A8C607}.Release|Any CPU.Build.0 = Release|Any CPU
+    EndGlobalSection
+EndGlobal
