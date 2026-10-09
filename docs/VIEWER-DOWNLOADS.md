@@ -52,6 +52,11 @@ source is checked out from the original immutable release tag, and only the
 packaging script is taken from the correction tag. Assets/checksums and Release
 notes are refreshed; the original release tag is never moved.
 
+The bundled manual checklist is the original source-tag snapshot; its historical
+release-pending wording does not describe current download availability. Use this
+page for current publication status. 包内人工清单保留原源码 tag 的文档快照；其中
+旧的待发布文字不代表当前下载状态，最新发布状态以本说明为准。
+
 ## Published v0.1.0-alpha / 已发布版本
 
 [Release](https://github.com/Starkxim/ManagedBlf/releases/tag/v0.1.0-alpha) · [Exact source](https://github.com/Starkxim/ManagedBlf/tree/v0.1.0-alpha) ·
