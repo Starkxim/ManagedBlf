@@ -30,9 +30,18 @@ Choose **Load demo** for seven synthetic CAN, CAN FD, LIN, and text objects, inc
 
 The viewer scans the whole file on a background task and retains the first 10,000 objects as a bounded preview. Filtering searches that preview. Selecting a row shows up to 256 serialized bytes and decoder warnings. Closing or cancelling requests cancellation between objects; an in-progress object read/decompression operation is not interruptible.
 
-## Viewer alpha packaging
+## Viewer alpha downloads
 
-[Download/package instructions](docs/VIEWER-DOWNLOADS.md) describe Windows x64 framework-dependent and self-contained variants. `scripts/package-viewer.ps1` builds and inspects both; CI checks demo generation, overwrite protection and window startup, without publishing. The separate manual/tag release workflow creates downloadable artifacts; only an explicit alpha tag publishes a prerelease. [Windows packaging/startup run 37874480695](https://github.com/Starkxim/ManagedBlf/actions/runs/37874480695) passed both variants, demo generation/overwrite protection and package inspection. CI retains preview ZIPs as review artifacts. Public Release publication and GUI interaction acceptance are pending.
+[v0.1.0-alpha Windows x64 prerelease](https://github.com/Starkxim/ManagedBlf/releases/tag/v0.1.0-alpha) is available with two ZIPs and [SHA256SUMS.txt](https://github.com/Starkxim/ManagedBlf/releases/download/v0.1.0-alpha/SHA256SUMS.txt):
+
+| Download | Runtime requirement | Size |
+| --- | --- | --- |
+| [Framework-dependent](https://github.com/Starkxim/ManagedBlf/releases/download/v0.1.0-alpha/ManagedBlf.Viewer-0.1.0-alpha-win-x64-framework-dependent.zip) | Install .NET 10 Desktop Runtime x64 | 153,179 bytes |
+| [Self-contained](https://github.com/Starkxim/ManagedBlf/releases/download/v0.1.0-alpha/ManagedBlf.Viewer-0.1.0-alpha-win-x64-self-contained.zip) | Includes .NET 10.0.12 and Windows Desktop runtime | 51,549,520 bytes |
+
+Extract the entire ZIP and run `ManagedBlf.Viewer.exe`. Both include LICENSE, bilingual usage instructions and the manual acceptance checklist. Apphost notices are included in `third-party-licenses`; the self-contained ZIP also includes its actual runtime licenses/notices under their own terms. **Load demo** generates synthetic data in memory; `--save-demo` creates a new synthetic file without overwriting an existing path. [Exact corresponding source](https://github.com/Starkxim/ManagedBlf/tree/v0.1.0-alpha) is commit `8ec6a72`.
+
+[Release workflow run 37877253845](https://github.com/Starkxim/ManagedBlf/actions/runs/37877253845) passed Windows net8.0/net10.0 regression (58 tests each), both package content checks, demo generation/overwrite protection, and actual window startup. On 2026-10-09 both published ZIPs were downloaded and checked for ZIP integrity, matching SHA-256, unchanged license text, runtime configuration, excluded content and third-party notice bytes against the official 10.0.12 NuGet packs. No native `binlog.dll`, captured logs, proprietary source, credentials or source build directories are bundled. Windows GUI mouse interaction remains unverified; startup checks do not complete manual acceptance. See [download/package instructions](docs/VIEWER-DOWNLOADS.md).
 
 ## Automated validation
 
@@ -80,7 +89,8 @@ Third-party format observations were consulted as references; their implementati
 | Sequential LOGG/LOBJ; compression 0/2; cross-container objects; bounded Span/handle API | Implemented |
 | Header v1/v2 flag 1/2 timestamps; CAN 1/86, FD 100/101, LIN 11/57, APP_TEXT 65 views | Implemented within documented layouts |
 | Unknown events/errors, header v3, FD101 extension attributes | Raw objects only; future padding is not guaranteed |
-| Writer, indexing/seek, broader typed events, NuGet and viewer downloads | Planned |
+| Windows x64 alpha viewer downloads | Released; startup checked; GUI interaction pending |
+| Writer, indexing/seek, broader typed events and NuGet | Planned |
 
 ## Roadmap / To-do
 
@@ -88,7 +98,7 @@ Completed boxes describe implemented scope; planned validation stays unchecked u
 
 0. [x] Publish this ordered roadmap and support matrix in both READMEs. Acceptance: matching public documentation with existing usage and license retained.
 1. [x] Independent regression tests and CI. Build fixtures from literal format fields, independently of production reader/demo logic; document public synthetic provenance. Cover EOF/errors, signatures/truncation, compression 0/2 and cross-container objects, zlib header/checksum/length, resource bounds, v1/v2 units/overflow, raw preservation, Span bounds, peek/skip/handle lifecycle, all seven decoders and FD101 short/extension variants. Acceptance: actual Linux and Windows Release build/test Actions runs, reported test counts, and a separate Windows GUI build. Assess .NET 10 LTS against Microsoft's current support policy while explaining .NET 8 consumer compatibility. GUI interaction remains separate manual acceptance.
-2. [ ] Windows viewer v0.1.0-alpha downloads. Provide LICENSE, usage and locally generated synthetic demo; identify framework-dependent and self-contained packages and runtime requirements. Use a separate manual/tag release workflow with write permission only on its release job. Acceptance: inspected clean package contents and packaging/startup checks; label outstanding Windows interaction checks explicitly.
+2. [x] Windows viewer v0.1.0-alpha downloads. Provide LICENSE, usage and locally generated synthetic demo; identify framework-dependent and self-contained packages and runtime requirements. Use a separate manual/tag release workflow with write permission only on its release job. Acceptance: inspected clean package contents and packaging/startup checks; label outstanding Windows interaction checks explicitly.
 3. [ ] Minimal safe writer for new files: writable/seekable streams, LOGG, LOBJ v1 nanosecond timestamps, uncompressed containers and CAN 1. Document ownership/leaveOpen, completion/disposal/fault behavior and format-defined size/count/time metadata. Validate explicit standard/extended ID flags, RTR, DLC/payload, channel and time without truncation or invented data. Acceptance: empty/multiple-object/multiple-container/invalid-input tests, typed round trips, independent expected bytes and an independent BLF tool check. No append, recovery or native pointer ABI.
 4. [ ] Extend writer one format at a time: zlib, CAN FD 100/101, LIN 11/57, APP_TEXT 65. Acceptance for each: boundary regression, format evidence, support matrix and example. FD101 extensions and header v3 stay raw until documented evidence and tests exist. Map native capabilities to safe managed APIs; prioritize event/error decoding, indexing and performance using public samples and demand, without promising full BLF coverage.
 5. [ ] Stabilize API, documentation and packaging. Document public API ownership, exceptions, threading and lifecycle; keep GUI independent. Acceptance: synchronized READMEs/format/manual checks, local NuGet pack and consumption with the custom LICENSE. Public NuGet publication and third-party commercial relicensing policy require a separately reviewed decision; no contributor relicensing rights are presumed.

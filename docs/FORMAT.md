@@ -54,3 +54,14 @@ fixtures in `tests/ManagedBlf.Tests` use literal offsets and their own stored-bl
 zlib envelope, without production padding/constants or demo generation. They
 validate this subset and corruption/resource/lifecycle behavior, not every
 compressed trailing-garbage variant or full external interoperability.
+
+## Alpha distribution
+
+[v0.1.0-alpha](https://github.com/Starkxim/ManagedBlf/releases/tag/v0.1.0-alpha) distributes only the Windows x64 viewer,
+with framework-dependent (.NET 10 Desktop Runtime required) and self-contained
+(.NET 10.0.12 included) ZIPs. Both include the custom LICENSE and synthetic demo
+generation. Apphost/runtime license notices are provided under
+`third-party-licenses` and retain their own terms. The exact source tag is `v0.1.0-alpha` at commit `8ec6a72`; no writer
+is introduced by this release. [Release validation](https://github.com/Starkxim/ManagedBlf/actions/runs/37877253845) and independent
+published-ZIP checks establish package integrity and startup, not GUI interaction
+or broader BLF interoperability.
