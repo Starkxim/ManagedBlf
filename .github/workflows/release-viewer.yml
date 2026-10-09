@@ -14,8 +14,34 @@ permissions:
 jobs:
   validate-and-package:
     runs-on: windows-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      repackage: ${{ steps.version.outputs.repackage }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Identify version and preserve original release source
+        id: version
+        shell: pwsh
+        env:
+          DISPATCH_VERSION: ${{ inputs.version }}
+        run: |
+          $requested = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME.Substring(1) } else { $env:DISPATCH_VERSION }
+          if ($requested -notmatch '^(?<version>\d+\.\d+\.\d+-alpha(?:\.\d+)?)(?:-package\.(?<revision>\d+))?$') { throw 'Invalid alpha version or packaging correction tag.' }
+          $version = $Matches.version
+          $repackage = [bool]$Matches.revision
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "repackage=$($repackage.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+          if ($repackage) {
+            $source = & git rev-parse "refs/tags/v$version^{commit}"
+            if ($LASTEXITCODE -ne 0) { throw 'The original alpha source tag is required.' }
+            $scriptCopy = Join-Path $env:RUNNER_TEMP 'managedblf-package-viewer.ps1'
+            Copy-Item scripts/package-viewer.ps1 $scriptCopy
+            & git checkout --detach $source
+            if ($LASTEXITCODE -ne 0) { throw 'Cannot select original alpha source.' }
+            Copy-Item $scriptCopy scripts/package-viewer.ps1 -Force
+          }
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
@@ -26,10 +52,8 @@ jobs:
       - name: Publish and check both packages
         shell: pwsh
         env:
-          DISPATCH_VERSION: ${{ inputs.version }}
-        run: |
-          $version = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME.Substring(1) } else { $env:DISPATCH_VERSION }
-          ./scripts/package-viewer.ps1 -Version $version
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: ./scripts/package-viewer.ps1 -Version $env:RELEASE_VERSION
       - uses: actions/upload-artifact@v4
         with:
           name: viewer-alpha
@@ -48,7 +72,29 @@ jobs:
         with:
           name: viewer-alpha
           path: artifacts/viewer
-      - name: Create alpha release
+      - name: Publish validated alpha assets and notes
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" artifacts/viewer/*.zip artifacts/viewer/SHA256SUMS.txt --verify-tag --prerelease --title "ManagedBlf $GITHUB_REF_NAME" --notes-file docs/VIEWER-DOWNLOADS.md
+          RELEASE_VERSION: ${{ needs.validate-and-package.outputs.version }}
+          REPACKAGE: ${{ needs.validate-and-package.outputs.repackage }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          version = os.environ['RELEASE_VERSION']
+          source = f'https://github.com/Starkxim/ManagedBlf/tree/v{version}'
+          manual = f'https://github.com/Starkxim/ManagedBlf/blob/v{version}/docs/MANUAL-CHECKS.md'
+          notes = Path('docs/VIEWER-DOWNLOADS.md').read_text().split('\n## Published ')[0]
+          notes = notes.replace('(MANUAL-CHECKS.md)', f'({manual})')
+          notes = notes.replace('https://github.com/Starkxim/ManagedBlf .', source + ' .')
+          if os.environ['REPACKAGE'] == 'true':
+              notes += '\nPackaging correction: apphost and bundled runtime licenses/third-party notices are included. Original application source tag is unchanged.\n\n打包修正：补齐 apphost 与自包含运行时的许可/第三方通知，应用源码原始 tag 保持不变。\n'
+          Path('/tmp/managedblf-release-notes.md').write_text(notes)
+          PY
+          if [ "$REPACKAGE" = "true" ]; then
+            gh release view "v$RELEASE_VERSION"
+            gh release upload "v$RELEASE_VERSION" artifacts/viewer/*.zip artifacts/viewer/SHA256SUMS.txt --clobber
+            gh release edit "v$RELEASE_VERSION" --prerelease --notes-file /tmp/managedblf-release-notes.md
+          else
+            gh release create "v$RELEASE_VERSION" artifacts/viewer/*.zip artifacts/viewer/SHA256SUMS.txt --verify-tag --prerelease --title "ManagedBlf v$RELEASE_VERSION" --notes-file /tmp/managedblf-release-notes.md
+          fi

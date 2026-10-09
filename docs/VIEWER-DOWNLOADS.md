@@ -18,6 +18,15 @@ LICENSE；商用需另行书面许可。对应源码见上述仓库的同名 rel
 - **依赖框架包**：安装 .NET 10 Desktop Runtime x64，完整解压 ZIP 后启动 EXE。
 - **自包含包**：包含运行时，完整解压后启动；更新运行时需更新整个包。
 
+Both packages include apphost license/third-party notices in `third-party-licenses`;
+the self-contained package also includes the licenses/notices from its actual
+.NET and Windows Desktop runtime packs. These components retain their own terms;
+the ManagedBlf LICENSE is unchanged.
+
+两个包都在 `third-party-licenses` 附上 apphost 的许可/第三方通知；自包含包另附
+实际 .NET 与 Windows Desktop 运行时包的许可/通知。这些组件适用各自条款，
+ManagedBlf 的 LICENSE 保持不变。
+
 Use **Load demo** to generate seven synthetic objects in memory; **Save demo**
 saves the fixture interactively. For a new file from the command line:
 
@@ -37,4 +46,8 @@ Maintainers: `scripts/package-viewer.ps1` publishes and inspects both variants,
 checks new-file demo generation and creates a window for five seconds before
 closing it. The separate release workflow runs regression first. Manual dispatch
 creates artifacts only; an explicit alpha tag publishes a prerelease with write
-permission confined to the release job. Build outputs are never source commits.
+permission confined to the release job. Build outputs are never source commits. A `v<alpha-version>-package.<revision>`
+tag explicitly corrects packaging for the existing alpha release: application
+source is checked out from the original immutable release tag, and only the
+packaging script is taken from the correction tag. Assets/checksums and Release
+notes are refreshed; the original release tag is never moved.
