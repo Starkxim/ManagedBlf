@@ -77,7 +77,7 @@ writer.Complete();
 
 `Create` 使用 `FileMode.CreateNew`，不覆盖已有路径。stream 构造函数只接受位于零位置的空、可写、可寻址流；`leaveOpen: true` 在 Dispose 后保留流。起点时间须为 `Unspecified`、毫秒对齐、年份 1601–9999。相对纳秒须非负，且加入起点后不能溢出墙钟范围。channel 为 1–65535，DLC 为 0–8，标准/扩展 ID 按 `IsExtended` 分别限制为 11/29 位。payload 长度须精确匹配 DLC；RTR（`IsRemote`）保留 DLC，但 payload 必须为空。不截断或补造调用者数据。
 
-writer 在有界未压缩容器中缓冲完整 CAN 1 对象。`Complete` 刷出数据并回填大小、计数、时间；成功后在 Dispose 前重复调用无操作。`Dispose` 完成健康 writer 并关闭其拥有的流，完成抛异常时也关闭。参数错误可修正后重试；I/O 故障永久阻止后续写入/完成，Dispose 不重试最终化。失败可能留下部分文件；创建不具事务性，Flush 不保证数据已持久写入磁盘。实例限单消费者，使用期间不要并发修改流。完整说明见 [writer 格式/API](docs/FORMAT.md#minimal-writer)。
+writer 在有界未压缩容器中缓冲完整 CAN 1 对象。`Complete` 刷出数据并回填大小、计数、时间；成功后在 Dispose 前重复调用无操作。`Dispose` 完成健康 writer 并关闭其拥有的流，完成抛异常时也关闭。参数错误可修正后重试；I/O 故障永久阻止后续写入/完成，Dispose 不重试最终化。失败可能留下部分文件；创建不具事务性，Flush 不保证数据已持久写入磁盘。实例限单消费者；成功完成前由 writer 独占使用流。完整说明见 [writer 格式/API](docs/FORMAT.md#minimal-writer)。
 
 ## 支持矩阵
 
@@ -87,7 +87,7 @@ writer 在有界未压缩容器中缓冲完整 CAN 1 对象。`Complete` 刷出�
 | Header v1/v2 flag 1/2 时间；CAN 1/86、FD 100/101、LIN 11/57、APP_TEXT 65 展示 | 已实现，限已说明布局 |
 | 未知事件/错误、header v3、FD101 扩展属性 | 只保留 raw；未来 padding 不保证 |
 | Windows x64 alpha viewer 下载 | 已发布；启动已检查，GUI 交互待验收 |
-| 新建 CAN 1 writer；LOBJ v1 纳秒；未压缩容器 | 当前源码已实现；第 3 阶段验收进行中 |
+| 新建 CAN 1 writer；LOBJ v1 纳秒；未压缩容器 | 当前源码已实现并验收；现有 alpha 下载包不含 writer |
 | writer 的 zlib、CAN FD、LIN、APP_TEXT；索引/seek、更广的 typed 事件、NuGet | 计划实现 |
 
 ## 开发路线 / To-do
@@ -97,13 +97,13 @@ writer 在有界未压缩容器中缓冲完整 CAN 1 对象。`Complete` 刷出�
 0. [x] 发布中英文有序路线与支持矩阵。验收：公开内容一致，保留使用和许可说明。
 1. [x] 独立回归测试与 CI。从格式字段独立构造合成 fixtures，不复用 reader/demo 逻辑，说明可公开来源。覆盖 EOF/异常、签名/截断、compression 0/2/跨容器、zlib 头/校验/长度、资源上限、v1/v2 时间单位/溢出、raw、Span、peek/skip/句柄生命周期、七种 decoder 及 FD101 短数据/扩展变体。验收：Linux、Windows 的真实 Release 构建/测试 Actions 成功并记录测试数，Windows 单独构建 GUI。按微软最新支持政策评估 .NET 10 LTS，解释 .NET 8 消费兼容取舍；GUI 交互另做人工验收。
 2. [x] Windows viewer v0.1.0-alpha 下载。附 LICENSE、使用说明和现场生成的合成 demo，区分依赖框架与自包含包及运行时要求。发布采用独立人工/tag 工作流，仅发布 job 有写权限。验收：检查包内容、打包和启动；明确标注尚未完成的 Windows 交互验收。
-3. [ ] 最小安全 writer，仅新建文件：可写/可寻址 stream、LOGG、LOBJ v1 纳秒时间、未压缩容器、CAN 1。说明所有权/leaveOpen、完成/重复完成/Dispose/失败行为和按格式统计的大小、计数、起止元数据；验证显式标准/扩展 ID 标志、RTR、DLC/payload、channel、时间，不截断或补造数据。验收：空文件、多对象、多容器、非法输入回归，typed 自互读、独立字节期望和独立 BLF 工具检查。首版不做 append、恢复、native 指针 ABI。
+3. [x] 最小安全 writer，仅新建文件：可写/可寻址 stream、LOGG、LOBJ v1 纳秒时间、未压缩容器、CAN 1。说明所有权/leaveOpen、完成/重复完成/Dispose/失败行为和按格式统计的大小、计数、起止元数据；验证显式标准/扩展 ID 标志、RTR、DLC/payload、channel、时间，不截断或补造数据。验收：空文件、多对象、多容器、非法输入回归，typed 自互读、独立字节期望和独立 BLF 工具检查。首版不做 append、恢复、native 指针 ABI。
 4. [ ] 逐项扩展 writer：zlib、CAN FD 100/101、LIN 11/57、APP_TEXT 65。每项验收须有边界回归、格式证据、矩阵和示例。FD101 扩展属性/header v3 在证据与测试齐备前继续 raw。将原生能力映射为安全 managed API；事件/错误解码、索引与性能按公开样本及需求排序，不承诺全面 BLF 覆盖。
 5. [ ] 稳定 API、文档与打包。公开 API 说明所有权、异常、线程、生命周期，保持核心不依赖 GUI。验收：中英文 README、格式说明、手工验收同步，本地 NuGet pack/消费验证并附定制 LICENSE。公开 NuGet 发布及第三方贡献商业再许可政策须另行审阅决策，不假定拥有贡献者的商业再许可权。
 
 2026-10-09 Linux 正式回归：net8.0、net10.0 各 58 项通过，零失败/跳过。[Actions run 37874151520](https://github.com/Starkxim/ManagedBlf/actions/runs/37874151520) 的 Linux/Windows × net8.0/net10.0 各 58 项测试及独立 Windows viewer Release 构建已通过；GUI 交互仍待验收。
 
-第 3 阶段本地 Linux 回归已通过：每目标 121 项（原 58 项 reader/decoder + 新增 63 项 writer），零失败/跳过，构建零警告/错误。net8.0、net10.0 双向 python-can 4.6.1 检查均通过，两目标生成的 fixture 字节一致。新增 writer jobs 的真实 Actions 验收待执行。独立字面量字节期望与外部检查只覆盖最小 CAN writer。GUI 交互、macOS 回归和完整外部 BLF 互操作仍未验证。
+第 3 阶段本地 Linux 回归已通过：每目标 121 项（原 58 项 reader/decoder + 新增 63 项 writer），零失败/跳过，构建零警告/错误。net8.0、net10.0 双向 python-can 4.6.1 检查均通过，两目标生成的 fixture 字节一致。[Actions run 37895947121](https://github.com/Starkxim/ManagedBlf/actions/runs/37895947121) 的 7 个 jobs 全部通过：Linux/Windows × net8.0/net10.0 核心回归（各 121 项）、两个 Linux 外部检查和 Windows viewer 构建/打包/启动检查。独立字面量字节期望与外部检查只覆盖最小 CAN writer。GUI 交互、macOS 回归和完整外部 BLF 互操作仍未验证。
 
 ## 许可证
 

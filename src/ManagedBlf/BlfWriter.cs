@@ -4,7 +4,7 @@ using System.Runtime.ExceptionServices;
 namespace ManagedBlf;
 
 /// <summary>Creates a BLF file containing uncompressed CAN type 1 objects.
-/// Requires an empty writable, seekable stream under exclusive caller control.
+/// Requires an empty writable, seekable stream used exclusively by this writer until completion.
 /// Single-consumer: methods and disposal must not run concurrently.</summary>
 public sealed class BlfWriter : IDisposable
 {

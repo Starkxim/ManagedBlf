@@ -40,7 +40,7 @@ APP_TEXT defaults to UTF-8 for the demo; this is an explicit presentation choice
 ## Minimal writer
 
 `BlfWriter` creates new files only. It requires an empty, writable and seekable
-stream positioned at zero, under exclusive caller control. `Create(path, start)`
+stream positioned at zero, used exclusively by the writer until successful completion. `Create(path, start)`
 uses `FileMode.CreateNew` and refuses existing paths. It writes a 144-byte LOGG
 header and compression-0 LOG_CONTAINERs containing complete CAN type 1 objects;
 there is no append, zlib writing, indexing, recovery or native pointer ABI.
@@ -128,8 +128,8 @@ one; these are tool conventions, not a BLF timezone guarantee. Its timestamps
 are floating-point seconds, compared with an absolute tolerance of 1 microsecond;
 literal-byte regression checks full relative nanosecond precision independently.
 These checks do not establish compatibility with every BLF producer/object type
-or replace GUI interaction acceptance. Local checks have passed; cross-platform
-Actions acceptance is pending. See the exact scope and results in
+or replace GUI interaction acceptance. Local checks and cross-platform Actions
+have passed. See the exact scope and results in
 [manual/automated evidence](MANUAL-CHECKS.md#writer-evidence).
 
 ## Public references
