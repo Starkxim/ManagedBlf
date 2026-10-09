@@ -15,6 +15,7 @@ foreach ($kind in @('framework-dependent', 'self-contained')) {
     if ($LASTEXITCODE -ne 0) { throw 'Viewer publish failed.' }
     Copy-Item (Join-Path $root 'LICENSE') $package
     Copy-Item (Join-Path $root 'docs/VIEWER-DOWNLOADS.md') (Join-Path $package 'README.md')
+    Copy-Item (Join-Path $root 'docs/MANUAL-CHECKS.md') $package
     $exe = Join-Path $package 'ManagedBlf.Viewer.exe'
     $demo = Join-Path $destination "demo-$kind.blf"
     $generation = Start-Process $exe -ArgumentList @('--save-demo', ('"' + $demo + '"')) -Wait -PassThru
