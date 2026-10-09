@@ -84,14 +84,14 @@ public class ReaderTests
     {
         var limits = new BlfReaderOptions { MaxObjectSize = 40, MaxContainerSize = 80, MaxBufferedBytes = 80 };
         using var r = Reader(Bytes.File(Bytes.Object(body: new byte[9])), limits); Assert.Throws<InvalidDataException>(() => r.SkipObject());
-        using var z = Reader(Bytes.File(Bytes.Container(new byte[81], 2)), limits); Assert.Throws<InvalidDataException>(() => z.SkipObject());
+        using var z = Reader(Bytes.File(Bytes.Container(Bytes.Object(), 2, 81)), limits); Assert.Contains("expanded size", Assert.Throws<InvalidDataException>(() => z.SkipObject()).Message);
     }
     [Fact] public void BufferLimitRejectsPendingPlusNewContainer()
     {
         var b = Bytes.Object(body: new byte[48]);
         var limits = new BlfReaderOptions { MaxObjectSize = 80, MaxContainerSize = 80, MaxBufferedBytes = 80 };
-        using var r = Reader(Bytes.File(Bytes.Container(b[..40]), Bytes.Container(b[40..].Concat(new byte[8]).ToArray(), 2)), limits);
-        Assert.Throws<InvalidDataException>(() => r.ReadNext(out _));
+        using var r = Reader(Bytes.File(Bytes.Container(b[..40]), Bytes.Container(b[40..].Concat(new byte[8]).ToArray(), 0)), limits);
+        Assert.Contains("Buffered object stream", Assert.Throws<InvalidDataException>(() => r.ReadNext(out _)).Message);
     }
     [Theory] [InlineData(1)] [InlineData(2)]
     public void MinimumVersionHeaderIsEnforced(int version)
