@@ -55,15 +55,15 @@ dotnet test tests/ManagedBlf.Tests/ManagedBlf.Tests.csproj -c Release
 勾选代表已完成的对应范围；计划中的验收须实际执行后才勾选。边界见 [格式说明](docs/FORMAT.md)，人工操作见 [验收用例](docs/MANUAL-CHECKS.md)。
 
 0. [x] 发布中英文有序路线与支持矩阵。验收：公开内容一致，保留使用和许可说明。
-1. [ ] 独立回归测试与 CI。从格式字段独立构造合成 fixtures，不复用 reader/demo 逻辑，说明可公开来源。覆盖 EOF/异常、签名/截断、compression 0/2/跨容器、zlib 头/校验/长度、资源上限、v1/v2 时间单位/溢出、raw、Span、peek/skip/句柄生命周期、七种 decoder 及 FD101 短数据/扩展变体。验收：Linux、Windows 的真实 Release 构建/测试 Actions 成功并记录测试数，Windows 单独构建 GUI。按微软最新支持政策评估 .NET 10 LTS，解释 .NET 8 消费兼容取舍；GUI 交互另做人工验收。
+1. [x] 独立回归测试与 CI。从格式字段独立构造合成 fixtures，不复用 reader/demo 逻辑，说明可公开来源。覆盖 EOF/异常、签名/截断、compression 0/2/跨容器、zlib 头/校验/长度、资源上限、v1/v2 时间单位/溢出、raw、Span、peek/skip/句柄生命周期、七种 decoder 及 FD101 短数据/扩展变体。验收：Linux、Windows 的真实 Release 构建/测试 Actions 成功并记录测试数，Windows 单独构建 GUI。按微软最新支持政策评估 .NET 10 LTS，解释 .NET 8 消费兼容取舍；GUI 交互另做人工验收。
 2. [ ] Windows viewer v0.1.0-alpha 下载。附 LICENSE、使用说明和现场生成的合成 demo，区分依赖框架与自包含包及运行时要求。发布采用独立人工/tag 工作流，仅发布 job 有写权限。验收：检查包内容、打包和启动；明确标注尚未完成的 Windows 交互验收。
 3. [ ] 最小安全 writer，仅新建文件：可写/可寻址 stream、LOGG、LOBJ v1 纳秒时间、未压缩容器、CAN 1。说明所有权/leaveOpen、完成/重复完成/Dispose/失败行为和按格式统计的大小、计数、起止元数据；验证显式标准/扩展 ID 标志、RTR、DLC/payload、channel、时间，不截断或补造数据。验收：空文件、多对象、多容器、非法输入回归，typed 自互读、独立字节期望和独立 BLF 工具检查。首版不做 append、恢复、native 指针 ABI。
 4. [ ] 逐项扩展 writer：zlib、CAN FD 100/101、LIN 11/57、APP_TEXT 65。每项验收须有边界回归、格式证据、矩阵和示例。FD101 扩展属性/header v3 在证据与测试齐备前继续 raw。将原生能力映射为安全 managed API；事件/错误解码、索引与性能按公开样本及需求排序，不承诺全面 BLF 覆盖。
 5. [ ] 稳定 API、文档与打包。公开 API 说明所有权、异常、线程、生命周期，保持核心不依赖 GUI。验收：中英文 README、格式说明、手工验收同步，本地 NuGet pack/消费验证并附定制 LICENSE。公开 NuGet 发布及第三方贡献商业再许可政策须另行审阅决策，不假定拥有贡献者的商业再许可权。
 
-2026-10-09 Linux 正式回归：net8.0、net10.0 各 58 项通过，零失败/跳过。真实 Actions 与 Windows GUI 构建验收仍待完成。
+2026-10-09 Linux 正式回归：net8.0、net10.0 各 58 项通过，零失败/跳过。[Actions run 37874151520](https://github.com/Starkxim/ManagedBlf/actions/runs/37874151520) 的 Linux/Windows × net8.0/net10.0 各 58 项测试及独立 Windows viewer Release 构建已通过；GUI 交互仍待验收。
 
-验收基线：独立自动化回归与真实 Actions 验收待完成。已有合成检查及 Windows 构建/publish 不代表 GUI 交互、macOS/Linux 功能回归或完整外部互操作通过。
+验收基线：独立回归与上述真实 Actions 已通过。已有合成检查及 Windows 构建/publish 不代表 GUI 交互、macOS/Linux 功能回归或完整外部互操作通过。
 
 ## 许可证
 

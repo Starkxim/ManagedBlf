@@ -27,6 +27,7 @@ The synthetic generator and reader alone do not prove third-party compatibility.
 On 2026-10-09 the independent core suite passed 58 tests per target on Linux with
 .NET 8.0.31 and 10.0.12. Run it with
 `dotnet test tests/ManagedBlf.Tests/ManagedBlf.Tests.csproj -c Release`.
-CI is configured for Linux/Windows and separate Windows viewer builds; actual
-Actions success remains pending. No GUI mouse interaction or macOS regression is
+[Actions run 37874151520](https://github.com/Starkxim/ManagedBlf/actions/runs/37874151520)
+passed all four Linux/Windows runtime jobs (58 tests each) and the separate
+Windows viewer Release build, with zero build warnings/errors. No GUI mouse interaction or macOS regression is
 claimed. The table above remains the manual acceptance checklist.
