@@ -1,0 +1,2 @@
+# External verification only; never a ManagedBlf library or viewer dependency.
+python-can==4.6.1

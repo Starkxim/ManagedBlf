@@ -1,6 +1,6 @@
 # ManagedBlf
 
-独立的 C# BLF 顺序读取库，附带一个用于展示和试用的 Windows GUI。解析库目标框架为 .NET 8 和 .NET 10，无第三方包和原生 DLL 依赖；GUI 使用 Windows Forms。
+独立的 C# BLF 库，支持顺序读取和有限的 CAN 写入，附带一个用于展示和试用的 Windows GUI。解析库目标框架为 .NET 8 和 .NET 10，无第三方包和原生 DLL 依赖；GUI 使用 Windows Forms。
 
 ## 目录与运行
 
@@ -30,7 +30,7 @@ GUI 在后台扫描整份文件，仅保留前 10,000 条预览。筛选只作�
 | [依赖框架包](https://github.com/Starkxim/ManagedBlf/releases/download/v0.1.0-alpha/ManagedBlf.Viewer-0.1.0-alpha-win-x64-framework-dependent.zip) | 安装 .NET 10 Desktop Runtime x64 | 153,179 字节 |
 | [自包含包](https://github.com/Starkxim/ManagedBlf/releases/download/v0.1.0-alpha/ManagedBlf.Viewer-0.1.0-alpha-win-x64-self-contained.zip) | 内含 .NET 10.0.12 与 Windows Desktop 运行时 | 51,549,520 字节 |
 
-完整解压后运行 `ManagedBlf.Viewer.exe`。两个包均附 LICENSE、双语使用说明和手工验收清单。`third-party-licenses` 提供 apphost 通知；自包含 ZIP 另附实际运行时的许可/通知，适用各自条款。**Load demo** 在内存现场生成合成数据；`--save-demo` 只新建合成文件，不覆盖已有路径。[精确对应源码](https://github.com/Starkxim/ManagedBlf/tree/v0.1.0-alpha) 为提交 `8ec6a72`。
+完整解压后运行 `ManagedBlf.Viewer.exe`。两个包均附 LICENSE、双语使用说明和手工验收清单。`third-party-licenses` 提供 apphost 通知；自包含 ZIP 另附实际运行时的许可/通知，适用各自条款。**Load demo** 在内存现场生成合成数据；`--save-demo` 只新建合成文件，不覆盖已有路径。[精确对应源码](https://github.com/Starkxim/ManagedBlf/tree/v0.1.0-alpha) 为提交 `8ec6a72`。这些现有 alpha 下载包包含 reader/viewer，不包含当前源码新增的 writer。
 
 [发布工作流 run 37877253845](https://github.com/Starkxim/ManagedBlf/actions/runs/37877253845) 已通过 Windows net8.0/net10.0 各 58 项回归、双包内容检查、demo 生成/禁止覆盖及实际窗口启动。2026-10-09 已下载两个公开 ZIP，核对 ZIP 完整性、SHA-256、许可文本、运行时配置、排除内容，并将第三方通知逐字节对照官方 10.0.12 NuGet 包。包不含原生 `binlog.dll`、真实日志、商业应用源码、凭据或源码构建目录。Windows GUI 鼠标交互仍待验收；启动检查不代表人工验收完成。详见 [下载/包说明](docs/VIEWER-DOWNLOADS.md)。
 
@@ -54,6 +54,31 @@ dotnet test tests/ManagedBlf.Tests/ManagedBlf.Tests.csproj -c Release
 
 完整限制见 [格式说明](docs/FORMAT.md)，手工验收见 [验收用例](docs/MANUAL-CHECKS.md)，来源见 [来源说明](docs/PROVENANCE.md)。本项目没有捆绑商业应用的其他源代码、原生 DLL 或日志，也不宣称覆盖全部 BLF 对象格式。
 
+## 新建 CAN 文件
+
+```csharp
+using ManagedBlf;
+
+// SYSTEMTIME 不含时区：显式传入所需的墙钟时间。
+var start = new DateTime(2026, 10, 9, 12, 0, 0, DateTimeKind.Unspecified);
+using var writer = BlfWriter.Create("new-capture.blf", start);
+writer.WriteCanMessage(new BlfCanFrame
+{
+    TimestampNanoseconds = 1_000_000,
+    Channel = 1,
+    Identifier = 0x42,
+    IsExtended = true, // ID 较小时也须显式指定扩展格式。
+    IsTransmit = true,
+    Dlc = 2,
+    Data = new byte[] { 0x12, 0x34 }
+});
+writer.Complete();
+```
+
+`Create` 使用 `FileMode.CreateNew`，不覆盖已有路径。stream 构造函数只接受位于零位置的空、可写、可寻址流；`leaveOpen: true` 在 Dispose 后保留流。起点时间须为 `Unspecified`、毫秒对齐、年份 1601–9999。相对纳秒须非负，且加入起点后不能溢出墙钟范围。channel 为 1–65535，DLC 为 0–8，标准/扩展 ID 按 `IsExtended` 分别限制为 11/29 位。payload 长度须精确匹配 DLC；RTR（`IsRemote`）保留 DLC，但 payload 必须为空。不截断或补造调用者数据。
+
+writer 在有界未压缩容器中缓冲完整 CAN 1 对象。`Complete` 刷出数据并回填大小、计数、时间；成功后在 Dispose 前重复调用无操作。`Dispose` 完成健康 writer 并关闭其拥有的流，完成抛异常时也关闭。参数错误可修正后重试；I/O 故障永久阻止后续写入/完成，Dispose 不重试最终化。失败可能留下部分文件；创建不具事务性，Flush 不保证数据已持久写入磁盘。实例限单消费者，使用期间不要并发修改流。完整说明见 [writer 格式/API](docs/FORMAT.md#minimal-writer)。
+
 ## 支持矩阵
 
 | 能力 | 状态 |
@@ -62,7 +87,8 @@ dotnet test tests/ManagedBlf.Tests/ManagedBlf.Tests.csproj -c Release
 | Header v1/v2 flag 1/2 时间；CAN 1/86、FD 100/101、LIN 11/57、APP_TEXT 65 展示 | 已实现，限已说明布局 |
 | 未知事件/错误、header v3、FD101 扩展属性 | 只保留 raw；未来 padding 不保证 |
 | Windows x64 alpha viewer 下载 | 已发布；启动已检查，GUI 交互待验收 |
-| writer、索引/seek、更广的 typed 事件、NuGet | 计划实现 |
+| 新建 CAN 1 writer；LOBJ v1 纳秒；未压缩容器 | 当前源码已实现；第 3 阶段验收进行中 |
+| writer 的 zlib、CAN FD、LIN、APP_TEXT；索引/seek、更广的 typed 事件、NuGet | 计划实现 |
 
 ## 开发路线 / To-do
 
@@ -77,7 +103,7 @@ dotnet test tests/ManagedBlf.Tests/ManagedBlf.Tests.csproj -c Release
 
 2026-10-09 Linux 正式回归：net8.0、net10.0 各 58 项通过，零失败/跳过。[Actions run 37874151520](https://github.com/Starkxim/ManagedBlf/actions/runs/37874151520) 的 Linux/Windows × net8.0/net10.0 各 58 项测试及独立 Windows viewer Release 构建已通过；GUI 交互仍待验收。
 
-验收基线：独立回归与上述真实 Actions 已通过。已有合成检查及 Windows 构建/publish 不代表 GUI 交互、macOS/Linux 功能回归或完整外部互操作通过。
+第 3 阶段本地 Linux 回归已通过：每目标 121 项（原 58 项 reader/decoder + 新增 63 项 writer），零失败/跳过，构建零警告/错误。net8.0、net10.0 双向 python-can 4.6.1 检查均通过，两目标生成的 fixture 字节一致。新增 writer jobs 的真实 Actions 验收待执行。独立字面量字节期望与外部检查只覆盖最小 CAN writer。GUI 交互、macOS 回归和完整外部 BLF 互操作仍未验证。
 
 ## 许可证
 
