@@ -21,6 +21,10 @@ dotnet build src/ManagedBlf/ManagedBlf.csproj -c Release
 
 GUI 在后台扫描整份文件，仅保留前 10,000 条预览。筛选只作用于预览；选中一行显示文本、解码提示和前 256 字节原始对象。取消和关闭在对象之间生效，进行中的对象读取或解压不能即时打断。
 
+## Viewer alpha 打包
+
+[下载/包说明](docs/VIEWER-DOWNLOADS.md) 区分 Windows x64 依赖框架与自包含包。`scripts/package-viewer.ps1` 构建并检查两个包；CI 验证 demo 生成、禁止覆盖和窗口启动，不发布。独立人工/tag 工作流准备下载物，仅显式 alpha tag 发布 prerelease。公开下载与 GUI 交互验收仍待完成。
+
 ## 自动化验证
 
 ```sh

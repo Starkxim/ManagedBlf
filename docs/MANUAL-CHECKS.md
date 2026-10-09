@@ -31,3 +31,8 @@ On 2026-10-09 the independent core suite passed 58 tests per target on Linux wit
 passed all four Linux/Windows runtime jobs (58 tests each) and the separate
 Windows viewer Release build, with zero build warnings/errors. No GUI mouse interaction or macOS regression is
 claimed. The table above remains the manual acceptance checklist.
+
+Alpha packaging checks use `scripts/package-viewer.ps1` on Windows: both deployment
+variants include LICENSE and usage, generate a new synthetic demo, reject
+overwrite, and create a viewer window. This smoke check is separate from the
+interactive table; published downloads are pending.

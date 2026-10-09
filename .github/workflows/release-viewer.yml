@@ -1,0 +1,54 @@
+name: Release viewer alpha
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Alpha version (for example 0.1.0-alpha)
+        required: true
+        default: 0.1.0-alpha
+  push:
+    tags:
+      - 'v*-alpha*'
+permissions:
+  contents: read
+jobs:
+  validate-and-package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+      - name: Independent regression
+        run: dotnet test tests/ManagedBlf.Tests/ManagedBlf.Tests.csproj -c Release
+      - name: Publish and check both packages
+        shell: pwsh
+        env:
+          DISPATCH_VERSION: ${{ inputs.version }}
+        run: |
+          $version = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME.Substring(1) } else { $env:DISPATCH_VERSION }
+          ./scripts/package-viewer.ps1 -Version $version
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viewer-alpha
+          path: |
+            artifacts/viewer/*.zip
+            artifacts/viewer/SHA256SUMS.txt
+  release:
+    needs: validate-and-package
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: viewer-alpha
+          path: artifacts/viewer
+      - name: Create alpha release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" artifacts/viewer/*.zip artifacts/viewer/SHA256SUMS.txt --verify-tag --prerelease --title "ManagedBlf $GITHUB_REF_NAME" --notes-file docs/VIEWER-DOWNLOADS.md

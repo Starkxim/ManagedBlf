@@ -30,6 +30,10 @@ Choose **Load demo** for seven synthetic CAN, CAN FD, LIN, and text objects, inc
 
 The viewer scans the whole file on a background task and retains the first 10,000 objects as a bounded preview. Filtering searches that preview. Selecting a row shows up to 256 serialized bytes and decoder warnings. Closing or cancelling requests cancellation between objects; an in-progress object read/decompression operation is not interruptible.
 
+## Viewer alpha packaging
+
+[Download/package instructions](docs/VIEWER-DOWNLOADS.md) describe Windows x64 framework-dependent and self-contained variants. `scripts/package-viewer.ps1` builds and inspects both; CI checks demo generation, overwrite protection and window startup, without publishing. The separate manual/tag release workflow creates downloadable artifacts; only an explicit alpha tag publishes a prerelease. Download publication and GUI interaction acceptance are pending.
+
 ## Automated validation
 
 ```sh
