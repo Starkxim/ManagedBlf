@@ -37,4 +37,17 @@ variants include LICENSE and usage, generate a new synthetic demo, reject
 overwrite, and create a viewer window. This smoke check is separate from the
 interactive table. [Run 37874480695](https://github.com/Starkxim/ManagedBlf/actions/runs/37874480695)
 passed both packages, generated 818-byte demos, rejected overwrites, and created
-both viewer windows on Windows. Published Release downloads are pending.
+both viewer windows on Windows. [v0.1.0-alpha](https://github.com/Starkxim/ManagedBlf/releases/tag/v0.1.0-alpha) was published by
+[release run 37877253845](https://github.com/Starkxim/ManagedBlf/actions/runs/37877253845) from source commit `8ec6a72`.
+The release workflow reran Windows net8.0/net10.0 regression (58 tests each),
+package content/demo/overwrite checks and both window startup checks.
+On 2026-10-09 the two published ZIPs were independently downloaded: ZIP CRCs
+and SHA256SUMS.txt matched; LICENSE text matched the tag (Windows CRLF differs
+from repository LF); runtime configuration, excluded content and third-party notices were checked
+against the exact official 10.0.12 NuGet packs. Both ZIPs include apphost notices;
+the self-contained ZIP also includes .NET and Windows Desktop runtime notices.
+Assets were refreshed by the explicit packaging correction tag
+`v0.1.0-alpha-package.1`; application source and original tag are unchanged.
+Framework-dependent ZIP: 153,179 bytes / 14 files, .NET 10 Desktop Runtime x64
+required. Self-contained ZIP: 51,549,520 bytes / 285 files, .NET 10.0.12 included.
+No GUI mouse interaction or complete external interoperability is claimed.

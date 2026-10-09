@@ -51,3 +51,26 @@ tag explicitly corrects packaging for the existing alpha release: application
 source is checked out from the original immutable release tag, and only the
 packaging script is taken from the correction tag. Assets/checksums and Release
 notes are refreshed; the original release tag is never moved.
+
+## Published v0.1.0-alpha / 已发布版本
+
+[Release](https://github.com/Starkxim/ManagedBlf/releases/tag/v0.1.0-alpha) · [Exact source](https://github.com/Starkxim/ManagedBlf/tree/v0.1.0-alpha) ·
+[Release workflow](https://github.com/Starkxim/ManagedBlf/actions/runs/37877253845)
+
+| Variant / 包 | Bytes / 字节 | SHA-256 |
+| --- | --- | --- |
+| Framework-dependent / 依赖框架 | 153179 | `d992c212ec2d419d5e336a1b839ecc6c9cf40a0dcc620d2cc89cf4c4ede44d22` |
+| Self-contained / 自包含 | 51549520 | `7cc81e0b5dc6680260beaa5d3a252925b74280d624cdac1f2b7b65270c044c73` |
+
+Validated on 2026-10-09: actual release workflow, 58 Windows regression tests per
+runtime, both package/demo/overwrite/window checks, and independent download
+inspection of published ZIPs against SHA256SUMS.txt. The self-contained package
+includes .NET 10.0.12. LICENSE text is unchanged (Windows CRLF line endings). The corrected ZIPs
+include exact official 10.0.12 apphost/runtime license notices; assets were
+refreshed by `v0.1.0-alpha-package.1`, without moving the original source tag.
+
+2026-10-09 已验证真实发布流程、Windows 双运行时各 58 项回归、双包内容/demo/
+禁止覆盖/窗口启动，以及实际下载 ZIP 的校验和。自包含包内含 .NET 10.0.12；
+许可文本未变，Windows 包使用 CRLF 换行。修正包已附官方 10.0.12 apphost/运行时
+许可通知；打包修正 tag 为 `v0.1.0-alpha-package.1`，原源码 tag 未移动。
+GUI 鼠标交互仍待验收。
