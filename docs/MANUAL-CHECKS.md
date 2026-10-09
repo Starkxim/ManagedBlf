@@ -22,6 +22,39 @@ Run on Windows with the .NET 10 Desktop Runtime. Build checks, headless parser e
 
 The synthetic generator and reader alone do not prove third-party compatibility. No proprietary DLL is needed to use this project or run the GUI.
 
+## Writer evidence
+
+On 2026-10-09 local Linux stage 3 regression passed 121 tests per target
+(58 reader/decoder + 63 writer), zero failures/skips and zero build warnings/errors.
+Both net8.0 and net10.0 passed the bidirectional python-can 4.6.1 checks and
+produced identical fixture bytes. [Actions run 37895947121](https://github.com/Starkxim/ManagedBlf/actions/runs/37895947121)
+passed all seven jobs: Linux/Windows net8.0/net10.0 core regression (121 tests
+each), two Linux external checks (Python 3.12.15/python-can 4.6.1), and the
+Windows viewer Release build, packaging and window startup. Existing 58-test runs
+below are historical reader/decoder acceptance, not evidence for the new writer.
+
+Writer regression covers literal whole-file expected bytes, typed read-back,
+empty files, multiple objects/containers, ID format flags, RTR/TX/DLC/payload,
+channel/time boundaries, start/last metadata and overflow, buffer limits,
+new-path/empty-stream restrictions, ownership/leaveOpen, repeated completion,
+disposal and persistent I/O faults. The independent expected file is a
+project-authored literal 224-byte hex value, not generated from writer logic.
+
+The validation-only python-can 4.6.1 check reads two generated synthetic files
+(empty and four frames in two uncompressed containers), verifies fields and
+header accounting independently, and creates a control file read by ManagedBlf.
+It covers CAN 1, explicit low-valued extended IDs, ID/channel boundaries, TX/RX,
+RTR, DLC and payload. Tool timestamps use floating-point seconds with at most
+1 microsecond absolute comparison tolerance; the byte test separately checks
+nanoseconds. Tool UTC and zero-based channel conventions are accounted for
+without assigning a BLF timezone. No captured logs or proprietary DLLs are used.
+See [fixture provenance](../tests/ManagedBlf.Tests/README.md) and
+[writer format/API policy](FORMAT.md#minimal-writer).
+
+The existing v0.1.0-alpha downloads do not contain this new writer. Writer checks
+do not complete Windows GUI interaction, macOS execution or compatibility with
+all other BLF tools, compression modes and object types.
+
 ## Automated evidence
 
 On 2026-10-09 the independent core suite passed 58 tests per target on Linux with

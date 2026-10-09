@@ -1,6 +1,6 @@
 # Supported format and API boundaries
 
-This is a reader for an observed BLF subset, not an official specification. Multi-byte fields are little endian unless explicitly identified as the big-endian zlib checksum.
+This library reads an observed BLF subset and writes a smaller CAN subset; this document is not an official specification. Multi-byte fields are little endian unless explicitly identified as the big-endian zlib checksum.
 
 ## Stream structure
 
@@ -37,10 +37,110 @@ CAN FD 101 with nonzero extension offset remains raw because available public de
 
 APP_TEXT defaults to UTF-8 for the demo; this is an explicit presentation choice, not a file-wide encoding guarantee. Pass an `Encoding` to `TryDecode` for another producer. Raw bytes remain intact. Text is never treated as executable instructions, links to fetch, or code.
 
+## Minimal writer
+
+`BlfWriter` creates new files only. It requires an empty, writable and seekable
+stream positioned at zero, used exclusively by the writer until successful completion. `Create(path, start)`
+uses `FileMode.CreateNew` and refuses existing paths. It writes a 144-byte LOGG
+header and compression-0 LOG_CONTAINERs containing complete CAN type 1 objects;
+there is no append, zlib writing, indexing, recovery or native pointer ABI.
+
+### Serialized fields and accounting
+
+| Structure | Fields written |
+| --- | --- |
+| LOGG, 144 bytes | Size 144 at 4; file size/uncompressed size u64 at 16/24; object count u32 at 32; start/last SYSTEMTIME at 40/56; unknown API/application identity, compression level, restore offset and reserved fields zero |
+| LOG_CONTAINER | Base header size 16/version 1/type 10; object size 32 + payload; compression method 0 at 16; expanded payload size u32 at 24; other container fields zero |
+| CAN 1, 48 bytes | Header size 32/version 1/type 1; flags 2 at 16 (nanoseconds); client index/object version zero; timestamp u64 at 24; channel u16 at 32; TX bit 0/RTR bit 7 at 34; DLC at 35; identifier u32 at 36, extended marker bit 31; fixed 8-byte data storage at 40 |
+
+For `N` CAN objects in `K` containers, both `FileSize` and
+`UncompressedFileSize` are `144 + 48*N + 32*K`. Uncompressed accounting includes
+file and container headers as well as expanded inner objects, following the fixed
+public references below. `ObjectCount` is `N`, excluding container wrappers. Every
+container payload is a multiple of 48, so the existing padding rule requires no
+trailing bytes. An empty completed file has only the 144-byte header, count zero,
+and identical start/last times. Unknown producer identity is zero; the writer
+does not claim to be a particular Vector/binlog version.
+
+`MaxContainerDataSize` defaults to 64 KiB and permits 48 through 64 MiB minus 32.
+The allocated buffer/effective capacity rounds down to a multiple of 48; objects
+are never split. Thus even the largest allowed whole container fits the reader's
+default 64 MiB limit. `ObjectsWritten` counts accepted frames, including buffered
+ones; it does not imply durable storage. Counts beyond the u32 field are rejected.
+
+### Input and time policy
+
+`BlfCanFrame` uses an explicit `IsExtended` flag, including extended IDs whose
+numeric value fits 11 bits. Standard IDs are 0–0x7FF and extended IDs are
+0–0x1FFFFFFF, supplied without the on-disk marker. Channel is one-based, 1–65535;
+DLC is 0–8. Non-RTR data length must equal DLC exactly. RTR frames must have empty
+logical data even with nonzero DLC. Unused bytes in the fixed storage field are
+zero; these bytes are not added to the logical payload. `IsTransmit` sets TX bit 0.
+Data is copied synchronously by `WriteCanMessage`; callers must not mutate it
+concurrently with the call, and may reuse it afterward.
+
+The required measurement start is a `DateTime` with `Kind.Unspecified`,
+millisecond-aligned, in years 1601–9999. It is the caller's wall clock, without a
+stored timezone. `TimestampNanoseconds` is a nonnegative signed `long`; values
+that exceed the resulting wall-clock range are rejected. All relative nanoseconds
+are serialized exactly. `LastObjectTime` is start plus the timestamp of the last
+accepted frame, truncated to SYSTEMTIME milliseconds. Out-of-order timestamps
+are allowed: this is the last-written time, not the maximum timestamp. The empty
+file uses start for both fields. This deterministic wall-clock policy does not
+reduce the precision of object timestamps.
+
+### Ownership, completion and errors
+
+Stream ownership transfers only when construction succeeds. On a constructor
+failure, the caller retains its stream; `Create` closes the stream it opened.
+Neither creation nor completion is transactional: an I/O failure can leave a
+partial newly created file. A provisional header is not a completed recording.
+
+`Complete` writes pending containers, backfills the file header, positions the
+stream at the file end and flushes it. Repeating successful completion is a no-op
+until disposal; writing after completion throws `InvalidOperationException`.
+`Dispose` completes a healthy writer, then closes an owned stream even if
+completion throws. Previously faulted writers are not finalized or retried;
+disposal is idempotent. `leaveOpen: true` keeps the stream open, but the disposed
+writer remains unusable (`ObjectDisposedException` from write/completion).
+
+Invalid input raises `ArgumentException`/`ArgumentOutOfRangeException` before
+accepting the frame and allows a corrected call. Object-count/address-space
+limits are checked before acceptance. Stream write/seek/flush errors propagate
+and permanently fault the writer; subsequent write/completion calls rethrow the
+recorded failure. Flush is not a disk durability guarantee. No operations or
+Dispose may run concurrently; the writer is single-consumer.
+
+### Independent checks and limits
+
+The regression suite compares an entire 224-byte, single-frame output to an
+independently authored literal hex expectation, alongside typed round trips,
+empty/multiple-object/multiple-container files and lifecycle/invalid-input/I/O
+boundaries. Expected bytes are not generated by the production writer or reader.
+The external check uses python-can **4.6.1** to read project-authored synthetic
+empty and four-frame files, then checks a separate python-can-produced control
+file with ManagedBlf. Coverage is limited to CAN 1, standard/extended IDs, RX/TX,
+RTR, payload/DLC, channel boundaries and multiple uncompressed containers.
+python-can is a validation-only dependency, not a core/library dependency.
+
+python-can converts SYSTEMTIME as UTC and exposes channels as disk channel minus
+one; these are tool conventions, not a BLF timezone guarantee. Its timestamps
+are floating-point seconds, compared with an absolute tolerance of 1 microsecond;
+literal-byte regression checks full relative nanosecond precision independently.
+These checks do not establish compatibility with every BLF producer/object type
+or replace GUI interaction acceptance. Local checks and cross-platform Actions
+have passed. See the exact scope and results in
+[manual/automated evidence](MANUAL-CHECKS.md#writer-evidence).
+
 ## Public references
 
 - [Wireshark author-maintained BLF field definitions](https://www.wireshark.org/docs/wsar_html/blf_8h_source.html)
 - [python-can author-maintained BLF module and compatibility observations](https://python-can.readthedocs.io/en/stable/_modules/can/io/blf.html)
+- [Fixed python-can 4.6.1 BLF observations](https://python-can.readthedocs.io/en/v4.6.1/_modules/can/io/blf.html)
+- [Fixed vector_blf file statistics](https://github.com/Technica-Engineering/vector_blf/blob/3512fc2ddca43248c95b773905d9c3ba46bc6570/src/Vector/BLF/FileStatistics.cpp)
+- [Fixed vector_blf uncompressed accounting](https://github.com/Technica-Engineering/vector_blf/blob/3512fc2ddca43248c95b773905d9c3ba46bc6570/src/Vector/BLF/File.cpp)
+- [Fixed vector_blf container fields](https://github.com/Technica-Engineering/vector_blf/blob/3512fc2ddca43248c95b773905d9c3ba46bc6570/src/Vector/BLF/LogContainer.cpp)
+- [Fixed vector_blf CAN 1 field definitions](https://github.com/Technica-Engineering/vector_blf/blob/3512fc2ddca43248c95b773905d9c3ba46bc6570/src/Vector/BLF/CanMessage.h)
 - [RFC 1950 zlib format](https://www.rfc-editor.org/rfc/rfc1950)
 - [Observed restore-point limitations](https://github.com/Technica-Engineering/vector_blf/blob/master/src/Vector/BLF/RestorePointContainer.h)
 
@@ -62,6 +162,6 @@ with framework-dependent (.NET 10 Desktop Runtime required) and self-contained
 (.NET 10.0.12 included) ZIPs. Both include the custom LICENSE and synthetic demo
 generation. Apphost/runtime license notices are provided under
 `third-party-licenses` and retain their own terms. The exact source tag is `v0.1.0-alpha` at commit `8ec6a72`; no writer
-is introduced by this release. [Release validation](https://github.com/Starkxim/ManagedBlf/actions/runs/37877253845) and independent
+is introduced by this release; the minimal writer described above is available in current source only. [Release validation](https://github.com/Starkxim/ManagedBlf/actions/runs/37877253845) and independent
 published-ZIP checks establish package integrity and startup, not GUI interaction
 or broader BLF interoperability.

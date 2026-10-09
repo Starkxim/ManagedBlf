@@ -27,6 +27,26 @@ jobs:
         with:
           name: tests-${{ matrix.os }}-${{ matrix.framework }}
           path: tests/ManagedBlf.Tests/TestResults/*.trx
+  writer-interop:
+    strategy:
+      fail-fast: false
+      matrix:
+        framework: [net8.0, net10.0]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r scripts/writer-interop-requirements.txt
+      - run: dotnet run --project tests/ManagedBlf.Interop -c Release -f ${{ matrix.framework }} -- generate artifacts/writer-interop/${{ matrix.framework }}
+      - run: python scripts/check-writer-interop.py artifacts/writer-interop/${{ matrix.framework }}
+      - run: dotnet run --project tests/ManagedBlf.Interop -c Release -f ${{ matrix.framework }} --no-build -- verify artifacts/writer-interop/${{ matrix.framework }}/python-can-control.blf
   viewer:
     runs-on: windows-latest
     steps:
