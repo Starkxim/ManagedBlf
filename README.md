@@ -59,6 +59,28 @@ The facade accepts a bounded `Span<byte>`. Its signatures and data model are **n
 
 Third-party format observations were consulted as references; their implementation source is not included. This project is not affiliated with or endorsed by Vector Informatik.
 
+## Support matrix
+
+| Capability | Status |
+| --- | --- |
+| Sequential LOGG/LOBJ; compression 0/2; cross-container objects; bounded Span/handle API | Implemented |
+| Header v1/v2 flag 1/2 timestamps; CAN 1/86, FD 100/101, LIN 11/57, APP_TEXT 65 views | Implemented within documented layouts |
+| Unknown events/errors, header v3, FD101 extension attributes | Raw objects only; future padding is not guaranteed |
+| Writer, indexing/seek, broader typed events, NuGet and viewer downloads | Planned |
+
+## Roadmap / To-do
+
+Completed boxes describe implemented scope; planned validation stays unchecked until executed. See [format boundaries](docs/FORMAT.md) and [manual checks](docs/MANUAL-CHECKS.md).
+
+0. [x] Publish this ordered roadmap and support matrix in both READMEs. Acceptance: matching public documentation with existing usage and license retained.
+1. [ ] Independent regression tests and CI. Build fixtures from literal format fields, independently of production reader/demo logic; document public synthetic provenance. Cover EOF/errors, signatures/truncation, compression 0/2 and cross-container objects, zlib header/checksum/length, resource bounds, v1/v2 units/overflow, raw preservation, Span bounds, peek/skip/handle lifecycle, all seven decoders and FD101 short/extension variants. Acceptance: actual Linux and Windows Release build/test Actions runs, reported test counts, and a separate Windows GUI build. Assess .NET 10 LTS against Microsoft's current support policy while explaining .NET 8 consumer compatibility. GUI interaction remains separate manual acceptance.
+2. [ ] Windows viewer v0.1.0-alpha downloads. Provide LICENSE, usage and locally generated synthetic demo; identify framework-dependent and self-contained packages and runtime requirements. Use a separate manual/tag release workflow with write permission only on its release job. Acceptance: inspected clean package contents and packaging/startup checks; label outstanding Windows interaction checks explicitly.
+3. [ ] Minimal safe writer for new files: writable/seekable streams, LOGG, LOBJ v1 nanosecond timestamps, uncompressed containers and CAN 1. Document ownership/leaveOpen, completion/disposal/fault behavior and format-defined size/count/time metadata. Validate explicit standard/extended ID flags, RTR, DLC/payload, channel and time without truncation or invented data. Acceptance: empty/multiple-object/multiple-container/invalid-input tests, typed round trips, independent expected bytes and an independent BLF tool check. No append, recovery or native pointer ABI.
+4. [ ] Extend writer one format at a time: zlib, CAN FD 100/101, LIN 11/57, APP_TEXT 65. Acceptance for each: boundary regression, format evidence, support matrix and example. FD101 extensions and header v3 stay raw until documented evidence and tests exist. Map native capabilities to safe managed APIs; prioritize event/error decoding, indexing and performance using public samples and demand, without promising full BLF coverage.
+5. [ ] Stabilize API, documentation and packaging. Document public API ownership, exceptions, threading and lifecycle; keep GUI independent. Acceptance: synchronized READMEs/format/manual checks, local NuGet pack and consumption with the custom LICENSE. Public NuGet publication and third-party commercial relicensing policy require a separately reviewed decision; no contributor relicensing rights are presumed.
+
+Validation baseline: independent automated regression and Actions acceptance are pending. Previous synthetic checks and Windows build/publish do not establish GUI interaction, macOS/Linux functional regression or complete external interoperability.
+
 ## License
 
 ManagedBlf is source-available under the [ManagedBlf Noncommercial Source License 1.0](LICENSE). Copyright (c) 2026 Cao (Starkxim).
