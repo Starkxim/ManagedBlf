@@ -35,4 +35,6 @@ claimed. The table above remains the manual acceptance checklist.
 Alpha packaging checks use `scripts/package-viewer.ps1` on Windows: both deployment
 variants include LICENSE and usage, generate a new synthetic demo, reject
 overwrite, and create a viewer window. This smoke check is separate from the
-interactive table; published downloads are pending.
+interactive table. [Run 37874480695](https://github.com/Starkxim/ManagedBlf/actions/runs/37874480695)
+passed both packages, generated 818-byte demos, rejected overwrites, and created
+both viewer windows on Windows. Published Release downloads are pending.

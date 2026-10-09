@@ -23,7 +23,7 @@ GUI 在后台扫描整份文件，仅保留前 10,000 条预览。筛选只作�
 
 ## Viewer alpha 打包
 
-[下载/包说明](docs/VIEWER-DOWNLOADS.md) 区分 Windows x64 依赖框架与自包含包。`scripts/package-viewer.ps1` 构建并检查两个包；CI 验证 demo 生成、禁止覆盖和窗口启动，不发布。独立人工/tag 工作流准备下载物，仅显式 alpha tag 发布 prerelease。公开下载与 GUI 交互验收仍待完成。
+[下载/包说明](docs/VIEWER-DOWNLOADS.md) 区分 Windows x64 依赖框架与自包含包。`scripts/package-viewer.ps1` 构建并检查两个包；CI 验证 demo 生成、禁止覆盖和窗口启动，不发布。独立人工/tag 工作流准备下载物，仅显式 alpha tag 发布 prerelease。[Windows 打包/启动 run 37874480695](https://github.com/Starkxim/ManagedBlf/actions/runs/37874480695) 已通过两个包、demo 生成/禁止覆盖与包内容检查。CI 保留预览 ZIP 供审阅；公开 Release 和 GUI 交互验收仍待完成。
 
 ## 自动化验证
 

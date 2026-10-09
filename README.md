@@ -32,7 +32,7 @@ The viewer scans the whole file on a background task and retains the first 10,00
 
 ## Viewer alpha packaging
 
-[Download/package instructions](docs/VIEWER-DOWNLOADS.md) describe Windows x64 framework-dependent and self-contained variants. `scripts/package-viewer.ps1` builds and inspects both; CI checks demo generation, overwrite protection and window startup, without publishing. The separate manual/tag release workflow creates downloadable artifacts; only an explicit alpha tag publishes a prerelease. Download publication and GUI interaction acceptance are pending.
+[Download/package instructions](docs/VIEWER-DOWNLOADS.md) describe Windows x64 framework-dependent and self-contained variants. `scripts/package-viewer.ps1` builds and inspects both; CI checks demo generation, overwrite protection and window startup, without publishing. The separate manual/tag release workflow creates downloadable artifacts; only an explicit alpha tag publishes a prerelease. [Windows packaging/startup run 37874480695](https://github.com/Starkxim/ManagedBlf/actions/runs/37874480695) passed both variants, demo generation/overwrite protection and package inspection. CI retains preview ZIPs as review artifacts. Public Release publication and GUI interaction acceptance are pending.
 
 ## Automated validation
 

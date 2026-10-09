@@ -37,3 +37,9 @@ jobs:
       - name: Package contents and startup smoke (no release)
         shell: pwsh
         run: ./scripts/package-viewer.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viewer-alpha-preview
+          path: |
+            artifacts/viewer/*.zip
+            artifacts/viewer/SHA256SUMS.txt
