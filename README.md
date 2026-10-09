@@ -1,6 +1,6 @@
 # ManagedBlf
 
-A small, independent C# reader for Vector BLF (Binary Logging Format) files, with a Windows viewer for trying the parser. The core library targets .NET 8 and has no external package or native DLL dependencies. The viewer uses standard Windows Forms.
+A small, independent C# reader for Vector BLF (Binary Logging Format) files, with a Windows viewer for trying the parser. The core library targets .NET 8 and .NET 10 and has no external package or native DLL dependencies. The viewer uses standard Windows Forms.
 
 [中文说明](README.zh-CN.md) · [Format and API boundaries](docs/FORMAT.md) · [Manual acceptance cases](docs/MANUAL-CHECKS.md) · [Source provenance](docs/PROVENANCE.md)
 
@@ -13,7 +13,7 @@ Both belong in one repository: the demo has a project reference to the library a
 
 ## Build and run
 
-Install the .NET 8 SDK or a newer SDK capable of targeting .NET 8. Running requires the .NET 8 runtime; the viewer requires Windows and the .NET 8 Desktop Runtime.
+Install the .NET 10 SDK. The core retains net8.0 consumer compatibility and adds net10.0; running uses the corresponding runtime. The viewer now targets net10.0-windows and requires Windows with the .NET 10 Desktop Runtime. Existing .NET 8 applications can continue referencing the net8.0 core without an API change.
 
 ```powershell
 dotnet build ManagedBlf.sln -c Release
@@ -29,6 +29,16 @@ dotnet build src/ManagedBlf/ManagedBlf.csproj -c Release
 Choose **Load demo** for seven synthetic CAN, CAN FD, LIN, and text objects, including one split across a compressed and an uncompressed container. **Save demo** writes that generated fixture to your chosen path; no business logs or proprietary binaries are bundled.
 
 The viewer scans the whole file on a background task and retains the first 10,000 objects as a bounded preview. Filtering searches that preview. Selecting a row shows up to 256 serialized bytes and decoder warnings. Closing or cancelling requests cancellation between objects; an in-progress object read/decompression operation is not interruptible.
+
+## Automated validation
+
+```sh
+dotnet test tests/ManagedBlf.Tests/ManagedBlf.Tests.csproj -c Release
+```
+
+Install both .NET 8 and .NET 10 runtimes to execute both test targets. Fixtures are independently authored synthetic bytes; see [fixture provenance](tests/ManagedBlf.Tests/README.md). CI builds/tests the core on Linux and Windows for each target and separately builds the viewer on Windows; it does not verify GUI interaction.
+
+As checked on 2026-10-09, [Microsoft support policy](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core) ends .NET 8 support on 2026-11-10 and supports .NET 10 LTS through 2028-11-14. net8.0 is retained for compatibility, not as an extension of Microsoft support; prefer net10.0 for new consumers. No third-party/native dependencies were added to the core.
 
 ## Library use
 
@@ -78,6 +88,8 @@ Completed boxes describe implemented scope; planned validation stays unchecked u
 3. [ ] Minimal safe writer for new files: writable/seekable streams, LOGG, LOBJ v1 nanosecond timestamps, uncompressed containers and CAN 1. Document ownership/leaveOpen, completion/disposal/fault behavior and format-defined size/count/time metadata. Validate explicit standard/extended ID flags, RTR, DLC/payload, channel and time without truncation or invented data. Acceptance: empty/multiple-object/multiple-container/invalid-input tests, typed round trips, independent expected bytes and an independent BLF tool check. No append, recovery or native pointer ABI.
 4. [ ] Extend writer one format at a time: zlib, CAN FD 100/101, LIN 11/57, APP_TEXT 65. Acceptance for each: boundary regression, format evidence, support matrix and example. FD101 extensions and header v3 stay raw until documented evidence and tests exist. Map native capabilities to safe managed APIs; prioritize event/error decoding, indexing and performance using public samples and demand, without promising full BLF coverage.
 5. [ ] Stabilize API, documentation and packaging. Document public API ownership, exceptions, threading and lifecycle; keep GUI independent. Acceptance: synchronized READMEs/format/manual checks, local NuGet pack and consumption with the custom LICENSE. Public NuGet publication and third-party commercial relicensing policy require a separately reviewed decision; no contributor relicensing rights are presumed.
+
+Linux regression on 2026-10-09: 58 tests passed on each of net8.0 and net10.0 (zero failures/skips). Real Actions and Windows GUI build acceptance remain pending.
 
 Validation baseline: independent automated regression and Actions acceptance are pending. Previous synthetic checks and Windows build/publish do not establish GUI interaction, macOS/Linux functional regression or complete external interoperability.
 

@@ -1,6 +1,6 @@
 # Manual acceptance cases
 
-Run on Windows with the .NET 8 Desktop Runtime. Build checks, headless parser execution, native comparison, and interactive GUI checks are separate evidence categories.
+Run on Windows with the .NET 10 Desktop Runtime. Build checks, headless parser execution, native comparison, and interactive GUI checks are separate evidence categories.
 
 | Case | Preconditions and steps | Expected result / regression point |
 | --- | --- | --- |
@@ -21,3 +21,12 @@ Run on Windows with the .NET 8 Desktop Runtime. Build checks, headless parser ex
 | External compatibility | Open synthetic file in an independent BLF tool; compare objects to native reader locally if available | Report exactly the covered types/flags; do not infer every object type is supported |
 
 The synthetic generator and reader alone do not prove third-party compatibility. No proprietary DLL is needed to use this project or run the GUI.
+
+## Automated evidence
+
+On 2026-10-09 the independent core suite passed 58 tests per target on Linux with
+.NET 8.0.31 and 10.0.12. Run it with
+`dotnet test tests/ManagedBlf.Tests/ManagedBlf.Tests.csproj -c Release`.
+CI is configured for Linux/Windows and separate Windows viewer builds; actual
+Actions success remains pending. No GUI mouse interaction or macOS regression is
+claimed. The table above remains the manual acceptance checklist.

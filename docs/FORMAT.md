@@ -45,3 +45,12 @@ APP_TEXT defaults to UTF-8 for the demo; this is an explicit presentation choice
 - [Observed restore-point limitations](https://github.com/Technica-Engineering/vector_blf/blob/master/src/Vector/BLF/RestorePointContainer.h)
 
 These were consulted for field facts and interoperability limits. Third-party implementation source was not copied or linked into this project.
+
+## Framework and regression scope
+
+The core targets net8.0 and net10.0 with unchanged reader APIs and no external
+package dependencies. The viewer targets net10.0-windows. Independent in-memory
+fixtures in `tests/ManagedBlf.Tests` use literal offsets and their own stored-block
+zlib envelope, without production padding/constants or demo generation. They
+validate this subset and corruption/resource/lifecycle behavior, not every
+compressed trailing-garbage variant or full external interoperability.
