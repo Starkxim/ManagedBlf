@@ -49,7 +49,18 @@ foreach ($kind in @('framework-dependent', 'self-contained')) {
     if ($LASTEXITCODE -ne 0) { throw 'Cannot identify the published apphost pack.' }
     $hostPacks = @(($hostJson | ConvertFrom-Json).Items.AppHostPack | Where-Object { $_.RuntimeIdentifier -eq 'win-x64' })
     if ($hostPacks.Count -ne 1) { throw 'Expected exactly one Windows x64 apphost pack.' }
-    Copy-DotNetNotices $hostPacks[0].NuGetPackageId $hostPacks[0].NuGetPackageVersion $package @('LICENSE.TXT', 'THIRD-PARTY-NOTICES.TXT')
+    $hostId = $hostPacks[0].NuGetPackageId
+    $hostVersion = $hostPacks[0].NuGetPackageVersion
+    if (!$hostId -or !$hostVersion) {
+        # An SDK-installed apphost exposes PackageDirectory instead of NuGet metadata.
+        $packDirectory = ([string]$hostPacks[0].PackageDirectory) -replace '\\', '/'
+        if ($packDirectory -notmatch '/(?<id>Microsoft\.NETCore\.App\.Host\.win-x64)/(?<version>\d+\.\d+\.\d+)$') {
+            throw 'Cannot identify the SDK-installed Windows apphost version.'
+        }
+        $hostId = $Matches.id
+        $hostVersion = $Matches.version
+    }
+    Copy-DotNetNotices $hostId $hostVersion $package @('LICENSE.TXT', 'THIRD-PARTY-NOTICES.TXT')
     if ($kind -eq 'self-contained') {
         $config = Get-Content (Join-Path $package 'ManagedBlf.Viewer.runtimeconfig.json') -Raw | ConvertFrom-Json
         $frameworks = @($config.runtimeOptions.includedFrameworks)
